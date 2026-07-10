@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>Fareline — Bus Ticket Booking</title>
+<meta name="description" content="Search routes, pick your seat and book bus tickets in minutes." />
+
+<!-- PWA: installability -->
+<link rel="manifest" href="manifest.json" />
+<meta name="theme-color" content="#16233F" />
+<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png" />
+<link rel="icon" type="image/png" sizes="16x16" href="icons/favicon-16.png" />
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="Fareline" />
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar__inner">
+    <a href="#/search" class="brand" data-nav="search">
+      <span class="brand__mark" aria-hidden="true">
+        <svg viewBox="0 0 40 40" width="30" height="30">
+          <rect x="4" y="10" width="32" height="18" rx="4" fill="var(--color-amber)"/>
+          <rect x="4" y="10" width="32" height="8" rx="4" fill="var(--color-navy)"/>
+          <circle cx="12" cy="30" r="3.4" fill="var(--color-navy)"/>
+          <circle cx="28" cy="30" r="3.4" fill="var(--color-navy)"/>
+        </svg>
+      </span>
+      <span class="brand__name">Fareline</span>
+    </a>
+
+    <nav class="topnav" aria-label="Primary" id="topnav">
+      <button class="topnav__link" data-nav="search">Book a trip</button>
+      <button class="topnav__link" data-nav="bookings">My bookings</button>
+    </nav>
+
+    <div class="topbar__notif" id="notifArea"></div>
+    <div class="topbar__auth" id="authArea"></div>
+  </div>
+</header>
+
+<main id="view" class="view" tabindex="-1"></main>
+
+<footer class="footer">
+  <div class="footer__inner">
+    <span>Fareline — a demo booking system. No real payments are processed.</span>
+    <span class="footer__right">
+      <button id="installBtn" class="btn btn-ghost btn-sm install-btn" style="display:none;" type="button">⬇ Install app</button>
+      <span class="footer__muted">Data is stored on this device only.</span>
+    </span>
+  </div>
+</footer>
+
+<div id="toastHost" class="toast-host" aria-live="polite"></div>
+
+<script src="js/data.js"></script>
+<script src="js/storage.js"></script>
+<script src="js/app.js"></script>
+<script>
+  // ---- PWA: register service worker + custom install button ----
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", () => {
+      navigator.serviceWorker.register("service-worker.js").catch(() => {
+        // Installability just won't be available (e.g. running from file://); the app still works.
+      });
+    });
+  }
+
+  let deferredInstallPrompt = null;
+  const installBtn = document.getElementById("installBtn");
+
+  window.addEventListener("beforeinstallprompt", (e) => {
+    e.preventDefault();
+    deferredInstallPrompt = e;
+    installBtn.style.display = "inline-flex";
+  });
+
+  installBtn.addEventListener("click", async () => {
+    if (!deferredInstallPrompt) return;
+    installBtn.style.display = "none";
+    deferredInstallPrompt.prompt();
+    await deferredInstallPrompt.userChoice;
+    deferredInstallPrompt = null;
+  });
+
+  window.addEventListener("appinstalled", () => {
+    installBtn.style.display = "none";
+    deferredInstallPrompt = null;
+  });
+</script>
+</body>
+</html>
